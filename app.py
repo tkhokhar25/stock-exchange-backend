@@ -17,7 +17,7 @@ def test_connect():
     return jsonify({'Client connected': True})
 
 @socketio.on('create')
-def on_join(data):
+def on_create(data):
     # Data should be in json format for example -> {'username' : 'Taranjit'}
     username = data['username']
     # Generate a five digit room Id below is just an example
