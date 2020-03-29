@@ -1,5 +1,5 @@
-from flask import Flask, render_template, jsonify, session
-from flask_socketio import SocketIO, emit, join_room, leave_room
+from flask import Flask, render_template, jsonify, session, json, Response
+from flask_socketio import SocketIO, emit, join_room, leave_room, send
 from flask_cors import CORS
     
 app = Flask(__name__)
@@ -11,22 +11,34 @@ def index():
     print('called')
     return jsonify({'called': True})
 
-@socketio.on('connect')
+@socketio.on('connect', '/user')
 def test_connect():
     print('Client connected')
     return jsonify({'Client connected': True})
 
-@socketio.on('create')
+@socketio.on('create', '/user')
 def on_create(data):
     # Data should be in json format for example -> {'username' : 'Taranjit'}
-    username = data['username']
+    # username = data['username']
     # Generate a five digit room Id below is just an example
     room = 'ABCDE'
     join_room(room)
-    # TODO: send the room ID to the client
+    print('on_create')
 
-@socketio.on('join')
+    return { 'room' : room }
+
+@socketio.on('join', '/user')
 def on_join(data):
+    # Data should be in json format for example -> {'username' : 'Taranjit', 'room' : 'ABCDE'}
+    # username = data['username']
+    room = data['room']
+    join_room(room)
+    print('on_join')
+    emit('socket_info', room, room=room)
+    return { 'room' : room }
+
+@socketio.on('start')
+def on_start(data):
     # Data should be in json format for example -> {'username' : 'Taranjit', 'room' : 'ABCDE'}
     username = data['username']
     room = data['room']
