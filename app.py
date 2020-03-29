@@ -1,5 +1,5 @@
-from flask import Flask, render_template, jsonify
-from flask_socketio import SocketIO, emit
+from flask import Flask, render_template, jsonify, session
+from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_cors import CORS
     
 app = Flask(__name__)
@@ -16,21 +16,21 @@ def test_connect():
     print('Client connected')
     return jsonify({'Client connected': True})
 
+@socketio.on('create')
+def on_join(data):
+    # Data should be in json format for example -> {'username' : 'Taranjit'}
+    username = data['username']
+    # Generate a five digit room Id below is just an example
+    room = 'ABCDE'
+    join_room(room)
+    # TODO: send the room ID to the client
 
-@socketio.on('disconnect')
-def test_disconnect():
-    print('Client disconnected')
-    return jsonify({'Client disconnected': True})
-
-@socketio.on('play video')
-def play_video(message):
-    print('play video')
-    emit('play video', broadcast=True)
-
-@socketio.on('pause video')
-def pause_video(message):
-    print('pause video')
-    emit('pause video', broadcast=True)
+@socketio.on('join')
+def on_join(data):
+    # Data should be in json format for example -> {'username' : 'Taranjit', 'room' : 'ABCDE'}
+    username = data['username']
+    room = data['room']
+    join_room(room)
 
 if __name__ == '__main__':
     socketio.run(app)
